@@ -16,3 +16,41 @@ Since TypeScript cannot handle type information for `.vue` imports, they are shi
 2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
 
 You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+
+## SeaORM migration guide
+
+1. Installing sea-orm-cli
+
+```bash
+cargo install sea-orm-cli
+```
+
+2. Changing working directory
+
+```bash
+cd src-tauri
+```
+
+3. Creating new migration 
+
+> using default directory `./migration`
+
+```bash
+sea-orm-cli migrate generate create_post_table
+```
+
+4. Updating dev database
+
+> using `DATABASE_URL` var in `.env` file.
+
+```bash
+sea-orm-cli migrate fresh
+```
+
+5. Regenerate entity files
+
+```bash
+rm -rf entity/src/*
+
+sea-orm-cli generate entity -o entity/src --lib --with-serde both
+```
