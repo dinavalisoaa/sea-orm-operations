@@ -8,6 +8,9 @@ impl Query {
     pub async fn find_post_by_id(db: &DbConn, id: i32) -> Result<Option<post::Model>, DbErr> {
         Post::find_by_id(id).one(db).await
     }
+    pub async fn find_all(db: &DbConn) -> Result<Vec<post::Model>, DbErr> {
+        Post::find().all(db).await
+    }
 
     /// If ok, returns (post models, num pages).
     pub async fn find_posts_in_page(

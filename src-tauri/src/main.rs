@@ -2,15 +2,16 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 
+use entity::post;
 use migration::{Migrator, MigratorTrait};
 use serde::{Deserialize, Serialize};
+use migration::sea_orm::EntityTrait;
 use std::env;
 use std::fs;
 use service::{
     sea_orm::{Database, DatabaseConnection},
     Mutation as MutationCore, Query as QueryCore,
 };
-use entity::post;
 
 
 
@@ -30,27 +31,45 @@ async fn main() {
         fs::create_dir_all(&data_dir).expect("Could not create data directory");
     }
 
-    let db_url = "sqlite://".to_string() + data_dir.to_str().unwrap() + "/db.sqlite?mode=rwc";
-    //let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-
+    // let db_url = "sqlite://".to_string() + data_dir.to_str().unwrap() + "/db.sqlite?mode=rwc";
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+    // let db_url = "sqlite://db.sqlite"; 
     let conn = Database::connect(db_url)
         .await
         .expect("Database connection failed");
-    Migrator::up(&conn, None).await.unwrap();
+    // Migrator::up(&conn, None).await.unwrap();
 
-    let state = AppState { conn };
 
-    tauri::Builder::default()
-        .manage(state)
-        .invoke_handler(tauri::generate_handler![
-            greet, 
-            create_post,
-            update_post,
-            delete_post,
-            list_posts,
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+  
+    // let posts = QueryCore::find_all(&conn)
+    //     .await
+    //     .expect("Cannot find posts in page");
+    // println!("{}<<<<<<<",posts[0].text)
+    let form=post::Model {
+        id: 1,
+        title: "New Title A".to_owned(),
+        text: "New Text A".to_owned(),
+    };
+
+    MutationCore::create_post(&conn, form)
+        .await
+        .expect("could not insert post");
+
+    
+
+    // let state = AppState { conn };
+
+    // tauri::Builder::default()
+    //     .manage(state)
+    //     .invoke_handler(tauri::generate_handler![
+    //         greet, 
+    //         create_post,
+    //         update_post,
+    //         delete_post,
+    //         list_posts,
+    //     ])
+    //     .run(tauri::generate_context!())
+    //     .expect("error while running tauri application");
 }
 
 
